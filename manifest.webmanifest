@@ -1,0 +1,17 @@
+{
+  "name": "Carnet de builds",
+  "short_name": "Builds",
+  "description": "Garde tes tutoriels de builds Minecraft, avec les matériaux à réunir.",
+  "lang": "fr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E6E9DE",
+  "theme_color": "#4E8A32",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

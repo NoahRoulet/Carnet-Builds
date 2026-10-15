@@ -1,0 +1,1628 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carnet de builds</title>
+<meta name="description" content="Garde tes tutoriels de builds Minecraft, avec les matériaux à réunir.">
+<meta name="theme-color" content="#4E8A32">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Builds">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root {
+  color-scheme: light dark;
+  --grass: #4E8A32;
+  --grass-hi: #6DB04A;
+  --dirt: #8B5E3C;
+  --dirt-dk: #6E4A2E;
+  --gold: #E3A62B;
+  --red: #C8352B;
+  --sky: #2F9CAB;
+  --bg: #E6E9DE;
+  --surface: #F8F9F4;
+  --sunken: #DCE0D2;
+  --ink: #1F2D21;
+  --soft: #596757;
+  --line: #243326;
+  --on-accent: #ffffff;
+  --ok: #4E8A32;
+  --err: #C8352B;
+  --radius: 16px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161C17;
+    --surface: #212A22;
+    --sunken: #1B221C;
+    --ink: #EDF2E8;
+    --soft: #A3B1A0;
+    --line: #080B09;
+    --grass: #5A9A3C;
+    --dirt: #A4714A;
+    --ok: #5A9A3C;
+    --err: #FF8A80;
+  }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--bg); }
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+}
+body.lock { overflow: hidden; }
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: var(--wallpaper, none); background-size: var(--wallsize, auto); background-repeat: repeat;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+h1, h2, h3, p { margin: 0; }
+svg { display: block; }
+:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+
+/* ---------- Bouton "bloc" ---------- */
+.blk {
+  background: var(--grass);
+  color: var(--on-accent);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 0 var(--line);
+  padding: 11px 16px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform .06s, box-shadow .06s;
+}
+.blk:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+.blk.ghost { background: var(--surface); color: var(--ink); }
+.blk.red { background: var(--red); }
+.blk.sm { padding: 7px 14px; font-size: 14px; box-shadow: 0 3px 0 var(--line); border-radius: 14px; }
+.iconbtn {
+  width: 44px; height: 44px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  box-shadow: 0 3px 0 var(--line);
+  position: relative;
+}
+.iconbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.iconbtn svg { width: 22px; height: 22px; }
+.badge {
+  position: absolute; top: -8px; right: -8px;
+  min-width: 20px; height: 20px; padding: 0 5px;
+  background: var(--gold); color: #1F2D21;
+  border: 2px solid var(--line); border-radius: 10px;
+  font-size: 12px; font-weight: 800; display: grid; place-items: center;
+}
+
+/* ---------- En-tête ---------- */
+.top {
+  background: var(--grass);
+  padding: calc(14px + var(--safe-t)) 16px 20px;
+  position: relative;
+  color: #fff;
+  border-radius: 0 0 30px 30px;
+  border-bottom: 7px solid var(--dirt);
+  box-shadow: 0 3px 0 var(--line);
+}
+.top-in { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.logo { width: 44px; height: 44px; border: 2px solid var(--line); border-radius: 14px; image-rendering: pixelated; flex-shrink: 0; background: var(--dirt); }
+.brand { flex: 1; min-width: 0; }
+.brand h1 { font-size: 20px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
+.brand p { font-size: 13px; opacity: .92; margin-top: 2px; }
+.top .iconbtn { color: var(--ink); }
+
+.wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+/* ---------- Recherche et onglets ---------- */
+.searchrow { display: flex; gap: 10px; margin-top: 20px; }
+.search {
+  flex: 1; display: flex; align-items: center; gap: 8px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  padding: 0 12px; height: 44px;
+  box-shadow: inset 0 2px 0 rgba(0,0,0,.08);
+}
+.search svg { width: 20px; height: 20px; color: var(--soft); flex-shrink: 0; }
+.search input {
+  flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink);
+  font: inherit; font-size: 16px; outline: none; height: 100%;
+}
+.search:focus-within { outline: 3px solid var(--sky); outline-offset: 2px; }
+.search input::-webkit-search-cancel-button { display: none; }
+
+.tabs {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  margin-top: 14px; padding: 4px;
+  background: var(--sunken); border: 2px solid var(--line); border-radius: 22px;
+}
+.tab {
+  border: 0; background: transparent; padding: 8px 2px; border-radius: 16px;
+  font-weight: 700; font-size: 13px; color: var(--soft);
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.tab b { font-size: 17px; color: var(--ink); line-height: 1.1; }
+.tab[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 2px 0 var(--line); outline: 2px solid var(--line); }
+
+.active-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.active-chips:empty { display: none; }
+.fchip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 999px;
+  padding: 4px 6px 4px 12px; font-weight: 700; font-size: 14px;
+}
+.fchip span.x { width: 22px; height: 22px; display: grid; place-items: center; background: var(--sunken); border-radius: 50%; }
+.fchip svg { width: 12px; height: 12px; }
+
+/* ---------- Carte de build ---------- */
+.list { margin-top: 16px; padding-bottom: calc(120px + var(--safe-b)); }
+.card {
+  display: flex; gap: 12px; width: 100%; text-align: left;
+  background: var(--surface); color: var(--ink);
+  border: 2px solid var(--line); border-radius: 22px;
+  box-shadow: 0 4px 0 var(--line);
+  padding: 10px; margin-bottom: 14px;
+  transition: transform .06s, box-shadow .06s;
+}
+.card:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+.thumb {
+  width: 92px; height: 92px; flex-shrink: 0; position: relative; overflow: hidden;
+  border: 2px solid var(--line); border-radius: 16px;
+  background: var(--dirt); color: #fff;
+  display: grid; place-items: center; font-weight: 900; font-size: 34px;
+}
+.thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.plat {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.62); color: #fff; font-size: 11px; font-weight: 700;
+  text-align: center; padding: 2px 0;
+}
+.cbody { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.cbody h3 {
+  font-size: 16px; line-height: 1.25; font-weight: 800;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; align-items: center; }
+.tag {
+  --c: var(--grass);
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 800; line-height: 1.2;
+  padding: 3px 8px; border-radius: 999px;
+  border: 2px solid var(--c);
+  background: color-mix(in srgb, var(--c) 18%, transparent);
+  color: var(--ink);
+}
+.tag.solid { background: var(--c); color: #fff; }
+.diff { display: inline-flex; gap: 3px; align-items: center; }
+.diff i { width: 10px; height: 10px; border: 2px solid var(--line); background: transparent; display: block; border-radius: 50%; }
+.diff i.on { background: var(--gold); }
+.cmeta { margin-top: auto; padding-top: 8px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--soft); font-weight: 600; }
+.bar { flex: 1; height: 10px; background: var(--sunken); border: 2px solid var(--line); border-radius: 999px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--grass-hi); width: 0; transition: width .25s; }
+.bar.big { height: 14px; margin: 8px 0 12px; }
+
+/* ---------- États vides ---------- */
+.empty {
+  background: var(--surface); border: 2px dashed var(--line); border-radius: 26px;
+  padding: 24px 18px; text-align: center;
+}
+.empty h2 { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
+.empty p { color: var(--soft); }
+.steps { list-style: none; padding: 0; margin: 18px 0 20px; text-align: left; display: grid; gap: 10px; }
+.steps li { display: flex; gap: 12px; align-items: center; font-weight: 600; }
+.steps .n {
+  width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center;
+  background: var(--gold); color: #1F2D21; border: 2px solid var(--line); border-radius: 12px; font-weight: 900;
+}
+.banner {
+  display: flex; align-items: center; gap: 12px; margin-top: 16px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 22px; padding: 10px 10px 10px 12px;
+}
+.banner p { flex: 1; font-size: 14px; font-weight: 600; }
+.banner .x { background: none; border: 0; padding: 8px; color: var(--soft); }
+.banner .x svg { width: 16px; height: 16px; }
+
+/* ---------- Bouton flottant ---------- */
+.fab { position: fixed; right: 16px; bottom: calc(18px + var(--safe-b)); z-index: 5; padding: 14px 20px; font-size: 17px; }
+.fab svg { width: 20px; height: 20px; }
+
+/* ---------- Pages plein écran ---------- */
+.page {
+  position: fixed; inset: 0; z-index: 20; background-color: var(--bg);
+  background-image: var(--wallpaper, none); background-size: var(--wallsize, auto); background-repeat: repeat;
+  display: none; flex-direction: column;
+}
+.page.open { display: flex; animation: up .22s ease-out; }
+@keyframes up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.pagebar {
+  display: flex; align-items: center; gap: 10px;
+  padding: calc(10px + var(--safe-t)) 14px 10px;
+  background: var(--surface); border-bottom: 2px solid var(--line); border-radius: 0 0 24px 24px;
+}
+.pagetitle { flex: 1; min-width: 0; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pagescroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.pagebody { max-width: 640px; margin: 0 auto; padding: 16px 16px calc(40px + var(--safe-b)); }
+.pagebody.withbar { padding-bottom: calc(110px + var(--safe-b)); }
+
+.video { aspect-ratio: 16 / 9; border: 2px solid var(--line); border-radius: 22px; overflow: hidden; background: #000; box-shadow: 0 4px 0 var(--line); }
+.video iframe { width: 100%; height: 100%; border: 0; display: block; }
+.videocard {
+  display: flex; align-items: center; gap: 14px; text-decoration: none; color: #fff;
+  background: var(--grass); border: 2px solid var(--line); border-radius: 22px; box-shadow: 0 4px 0 var(--line);
+  padding: 16px; position: relative; overflow: hidden; min-height: 96px;
+}
+.videocard img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
+.videocard .play, .videocard .vt { position: relative; }
+.videocard .play { width: 52px; height: 52px; border-radius: 50%; background: var(--red); border: 2px solid var(--line); display: grid; place-items: center; flex-shrink: 0; }
+.videocard .play svg { width: 24px; height: 24px; margin-left: 3px; }
+.videocard .vt { font-weight: 900; font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.videocard .vt small { display: block; font-weight: 600; font-size: 13px; opacity: .95; }
+.sublink { display: inline-block; margin-top: 10px; color: var(--soft); font-size: 14px; font-weight: 600; }
+
+.dtitle { font-size: 26px; font-weight: 900; line-height: 1.15; margin-top: 20px; letter-spacing: -0.01em; }
+.by { color: var(--soft); margin-top: 4px; font-weight: 600; }
+.block { margin-top: 24px; }
+.block h3 { font-size: 17px; font-weight: 900; }
+.rowhead { display: flex; align-items: baseline; justify-content: space-between; }
+.rowhead span { color: var(--soft); font-weight: 700; font-size: 14px; }
+.seg2 { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; margin-top: 10px; }
+.seg2 button {
+  padding: 10px 4px; font-weight: 800; font-size: 14px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: 0 3px 0 var(--line);
+}
+.seg2 button:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.seg2 button[aria-pressed="true"] { background: var(--c, var(--grass)); color: #fff; }
+
+#mlist { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.mrow {
+  width: 100%; display: flex; align-items: center; gap: 12px; text-align: left;
+  padding: 12px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
+  min-height: 52px;
+}
+.mrow .box {
+  width: 26px; height: 26px; flex-shrink: 0; display: grid; place-items: center;
+  background: var(--bg); border: 2px solid var(--line); border-radius: 9px; color: #fff;
+}
+.mrow .box svg { width: 18px; height: 18px; }
+.mrow.done { background: color-mix(in srgb, var(--ok) 16%, var(--surface)); }
+.mrow.done .box { background: var(--ok); }
+.mrow.done .mt { text-decoration: line-through; opacity: .6; }
+.qty { flex-shrink: 0; min-width: 38px; text-align: center; background: var(--gold); color: #1F2D21; border: 2px solid var(--line); border-radius: 999px; padding: 1px 6px; font-weight: 900; font-size: 14px; }
+.mt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.reset { background: none; border: 0; color: var(--soft); text-decoration: underline; font-weight: 600; padding: 10px 0 0; }
+.notes { white-space: pre-wrap; margin-top: 8px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); padding: 12px; }
+.nomat { color: var(--soft); margin-top: 8px; }
+
+/* ---------- Formulaire ---------- */
+.field { margin-top: 20px; }
+.field:first-child { margin-top: 0; }
+.field > label, .field > .lbl { display: block; font-weight: 800; margin-bottom: 6px; }
+.help { color: var(--soft); font-size: 13px; margin-top: 6px; }
+.input {
+  width: 100%; font: inherit; font-size: 16px; color: var(--ink);
+  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 12px; box-shadow: inset 0 2px 0 rgba(0,0,0,.08);
+}
+textarea.input { min-height: 140px; resize: vertical; line-height: 1.5; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  --c: var(--grass);
+  padding: 7px 12px; font-weight: 700; font-size: 14px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.chip[aria-pressed="true"] { background: var(--c); color: #fff; }
+.chip .dot { width: 10px; height: 10px; background: var(--c); border: 2px solid var(--line); display: block; }
+.chip[aria-pressed="true"] .dot { background: #fff; }
+.err { color: var(--err); font-weight: 800; margin-top: 6px; font-size: 14px; }
+.ok { color: var(--grass-hi); font-weight: 700; }
+.savebar {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--surface); border-top: 2px solid var(--line); border-radius: 26px 26px 0 0;
+  padding: 12px 16px calc(12px + var(--safe-b)); display: flex; gap: 10px;
+}
+.savebar .blk { flex: 1; }
+.danger { background: none; border: 0; color: var(--err); font-weight: 800; padding: 16px 0 0; }
+
+/* ---------- Feuilles du bas ---------- */
+.sheet { position: fixed; inset: 0; z-index: 40; display: none; }
+.sheet.open { display: block; }
+.scrim { position: absolute; inset: 0; background: rgba(8, 12, 9, .55); animation: fade .2s; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.panel {
+  position: absolute; left: 0; right: 0; bottom: 0; max-height: 86vh; overflow-y: auto;
+  max-width: 640px; margin: 0 auto;
+  background: var(--bg); border: 2px solid var(--line); border-bottom: 0; border-radius: 30px 30px 0 0;
+  padding: 10px 16px calc(20px + var(--safe-b)); animation: up .22s ease-out;
+}
+.grab { width: 44px; height: 5px; border-radius: 3px; background: var(--soft); opacity: .5; margin: 0 auto 12px; }
+.panel h2 { font-size: 20px; font-weight: 900; margin-bottom: 14px; }
+.fgroup { margin-top: 16px; }
+.fgroup h3 { font-size: 14px; font-weight: 800; color: var(--soft); margin-bottom: 8px; }
+.menurow {
+  width: 100%; display: flex; align-items: center; gap: 14px; text-align: left;
+  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 12px; margin-bottom: 10px;
+}
+.menurow svg { width: 24px; height: 24px; flex-shrink: 0; color: var(--grass); }
+.menurow b { display: block; }
+.menurow small { color: var(--soft); font-size: 13px; }
+.panel .foot { display: flex; gap: 10px; margin-top: 20px; }
+.panel .foot .blk { flex: 1; }
+.howto { padding-left: 20px; display: grid; gap: 8px; margin: 0 0 8px; }
+
+/* ---------- Message temporaire ---------- */
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(92px + var(--safe-b)); z-index: 60;
+  background: var(--ink); color: var(--bg); border-radius: 20px; padding: 10px 14px;
+  display: none; align-items: center; gap: 14px; font-weight: 700; max-width: calc(100% - 32px); box-shadow: 0 4px 0 var(--line);
+}
+.toast.show { display: flex; animation: fade .15s; }
+.toast button { background: none; border: 0; color: var(--gold); font-weight: 900; padding: 4px; text-decoration: underline; }
+
+details.ctx { margin-top: 10px; }
+details.ctx summary { cursor: pointer; font-weight: 700; color: var(--soft); font-size: 14px; padding: 4px 0; }
+.warn { background: color-mix(in srgb, var(--gold) 22%, var(--surface)); border: 2px solid var(--line); border-radius: var(--radius); padding: 10px 12px; font-size: 14px; margin-bottom: 14px; }
+.bi { width: 28px; height: 28px; flex-shrink: 0; display: block; image-rendering: pixelated; filter: drop-shadow(0 1.5px 0 rgba(0,0,0,.35)); }
+.bic { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; background: var(--sunken); border-radius: 12px; }
+.mini { display: flex; align-items: center; gap: 4px; margin-top: 8px; }
+.mini .bi { width: 20px; height: 20px; filter: none; }
+.mini .more { font-size: 12px; font-weight: 800; color: var(--soft); margin-left: 2px; }
+.blocks { display: flex; justify-content: center; gap: 10px; margin: 0 0 16px; }
+.blocks .bi { width: 38px; height: 38px; }
+.thumb .emo { font-size: 38px; line-height: 1; }
+.tab .tl { white-space: nowrap; }
+.top-btns { display: flex; gap: 10px; }
+.themes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.theme { text-align: left; padding: 0; background: none; border: 2px solid var(--line); border-radius: 20px; overflow: hidden; box-shadow: 0 3px 0 var(--line); position: relative; }
+.theme:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.theme[aria-pressed="true"] { outline: 4px solid var(--gold); outline-offset: 2px; }
+.theme .tp { height: 78px; position: relative; background-repeat: repeat; }
+.theme .tpbar { height: 20px; }
+.theme .tpcard { position: absolute; left: 12px; right: 12px; bottom: 9px; height: 22px; border-radius: 11px; border: 2px solid; }
+.theme .tn { padding: 8px 10px; font-weight: 800; font-size: 14px; background: var(--surface); color: var(--ink); }
+.theme .tn small { display: block; font-weight: 600; color: var(--soft); font-size: 12px; }
+.theme .chk { position: absolute; top: 28px; right: 8px; width: 24px; height: 24px; border-radius: 50%; background: var(--gold); color: #1F2D21; border: 2px solid var(--line); display: grid; place-items: center; }
+.theme .chk svg { width: 14px; height: 14px; }
+.fgroup.span { grid-column: 1 / -1; }
+.sectitle { grid-column: 1 / -1; font-size: 14px; font-weight: 800; color: var(--soft); margin-top: 6px; }
+textarea.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; min-height: 110px; }
+.cathead { font-size: 13px; font-weight: 800; color: var(--soft); margin: 14px 0 6px; }
+.morebtn { background: none; border: 0; color: var(--soft); text-decoration: underline; font-weight: 700; padding: 12px 0 2px; }
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <img class="logo" src="icon-192.png" alt="" onerror="this.style.visibility='hidden'">
+    <div class="brand">
+      <h1>Carnet de builds</h1>
+      <p id="subtitle">Tes tutoriels, au même endroit</p>
+    </div>
+    <div class="top-btns">
+      <button class="iconbtn" id="btnTheme" aria-label="Thèmes" type="button"></button>
+      <button class="iconbtn" id="btnMenu" aria-label="Menu" type="button"></button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="searchrow">
+    <label class="search">
+      <span id="icSearch"></span>
+      <input id="q" type="search" placeholder="Chercher un build ou un matériau" aria-label="Rechercher" autocomplete="off">
+    </label>
+    <button class="iconbtn" id="btnFilters" aria-label="Filtres" type="button"></button>
+  </div>
+  <nav class="tabs" id="tabs" aria-label="Avancement"></nav>
+  <div class="active-chips" id="activeChips"></div>
+  <div id="banner"></div>
+  <main class="list" id="list"></main>
+</div>
+
+<button class="blk fab" id="fab" type="button"></button>
+
+<section class="page" id="page" aria-label="Build"></section>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<script>
+(() => {
+"use strict";
+
+/* ===================== Utilitaires ===================== */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 8));
+
+const svg = (d, extra = "") => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" ${extra}>${d}</svg>`;
+const I = {
+  search: svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>'),
+  filter: svg('<path d="M4 6h16M7 12h10M10 18h4"/>'),
+  dots: svg('<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>'),
+  back: svg('<path d="M15 5l-7 7 7 7"/>'),
+  pencil: svg('<path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/>'),
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
+  x: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+  check: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  play: svg('<path d="M7 4l13 8-13 8z" fill="currentColor"/>'),
+  down: svg('<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>'),
+  up: svg('<path d="M12 16V5M7 9l5-5 5 5M5 20h14"/>'),
+  palette: svg('<path d="M12 3a9 9 0 100 18c1.3 0 2.1-.9 2.1-2 0-.6-.3-1-.6-1.4-.3-.4-.5-.8-.5-1.2 0-1 .8-1.9 1.9-1.9H17a4 4 0 004-4c0-4-4.1-7.5-9-7.5z"/><circle cx="7.5" cy="11" r="1.1"/><circle cx="10" cy="7" r="1.1"/><circle cx="15" cy="7.5" r="1.1"/>'),
+  phone: svg('<rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M11 18.5h2"/>'),
+};
+
+const KEY = "carnet-builds-v1";
+const DISMISS_KEY = "carnet-install-dismissed";
+
+const SEASONS = [
+  { n: "Toute l'année", c: "#6B7A68", e: "🗓️" },
+  { n: "Printemps", c: "#6DB04A", e: "🌸" },
+  { n: "Été", c: "#E3A62B", e: "☀️" },
+  { n: "Automne", c: "#B8652D", e: "🍂" },
+  { n: "Halloween", c: "#E0661C", e: "🎃" },
+  { n: "Hiver", c: "#3F95C4", e: "❄️" },
+  { n: "Noël", c: "#C8352B", e: "🎄" },
+];
+const ALL_YEAR = SEASONS[0].n;
+const seasonColor = (n) => (SEASONS.find((s) => s.n === n) || SEASONS[0]).c;
+const DIFFS = ["Facile", "Moyen", "Difficile"];
+const EDITIONS = ["Bedrock", "Java", "Les deux"];
+const STATUSES = [
+  { n: "À faire", plural: "À faire", c: "#C08A4B", e: "🧱" },
+  { n: "En cours", plural: "En cours", c: "#2F9CAB", e: "⛏️" },
+  { n: "Terminé", plural: "Terminés", c: "#4E8A32", e: "✅" },
+];
+const statusColor = (n) => (STATUSES.find((s) => s.n === n) || STATUSES[0]).c;
+const statusEmoji = (n) => (STATUSES.find((s) => s.n === n) || STATUSES[0]).e;
+const seasonEmoji = (n) => (SEASONS.find((s) => s.n === n) || SEASONS[0]).e;
+const CATEGORIES = [
+  { g: "Habitat", items: [["Maison", "🏠"], ["Cabane", "🛖"], ["Manoir", "🏡"], ["Maison dans un arbre", "🌳"], ["Base de survie", "⛺"], ["Base souterraine", "⛏️"], ["Immeuble", "🏢"]] },
+  { g: "Bâtiments", items: [["Château", "🏰"], ["Tour", "🗼"], ["Église", "⛪"], ["Temple", "🏛️"], ["Taverne", "🍺"], ["Boutique", "🏪"], ["Forge", "🔨"], ["Bibliothèque", "📚"], ["Village", "🏘️"], ["Ville", "🌆"], ["Pont", "🌉"], ["Port", "⚓"]] },
+  { g: "Nature", items: [["Ferme", "🌾"], ["Jardin", "🌷"], ["Arbre", "🌲"], ["Paysage", "⛰️"], ["Île", "🏝️"], ["Cascade", "💧"], ["Grotte", "🕳️"]] },
+  { g: "Décor", items: [["Décoration", "🎨"], ["Statue", "🗿"], ["Fontaine", "⛲"], ["Intérieur", "🛋️"], ["Lampadaire", "💡"], ["Pixel art", "🖼️"], ["Cimetière", "🪦"]] },
+  { g: "Styles", items: [["Médiéval", "⚔️"], ["Fantasy", "🔮"], ["Moderne", "🏗️"], ["Japonais", "⛩️"], ["Viking", "🪓"], ["Égyptien", "🔺"], ["Steampunk", "⚙️"], ["Science-fiction", "🚀"], ["Cottagecore", "🌼"], ["Western", "🤠"], ["Horreur", "👻"]] },
+  { g: "Transports", items: [["Bateau", "⛵"], ["Train", "🚂"], ["Avion", "✈️"], ["Voiture", "🚗"], ["Vaisseau", "🛸"]] },
+  { g: "Technique", items: [["Redstone", "🔴"], ["Ferme automatique", "🤖"], ["Piège", "🪤"], ["Porte secrète", "🚪"], ["Mini-jeu", "🎮"]] },
+];
+const QUICK_CATEGORIES = ["Maison", "Château", "Ferme", "Décoration", "Médiéval", "Redstone", "Bateau", "Village"];
+
+function parseVideo(url) {
+  const u = (url || "").trim();
+  if (!u) return { kind: "none" };
+  const yt = u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/))([\w-]{11})/);
+  if (yt) return { kind: "youtube", id: yt[1] };
+  if (/youtube\.com\/results/i.test(u)) return { kind: "ytsearch" };
+  if (/tiktok\.com/i.test(u)) return { kind: "tiktok" };
+  if (/instagram\.com/i.test(u)) return { kind: "instagram" };
+  return { kind: "web" };
+}
+const PLATFORM = { youtube: "YouTube", ytsearch: "Recherche", tiktok: "TikTok", instagram: "Instagram", web: "Site web", none: "" };
+const isUrl = (s) => /^https?:\/\/\S+\.\S+/i.test((s || "").trim());
+
+function normalize(b) {
+  return {
+    id: String(b.id || uid()),
+    createdAt: Number(b.createdAt) || Date.now(),
+    status: STATUSES.some((s) => s.n === b.status) ? b.status : "À faire",
+    title: String(b.title || "Sans titre"),
+    url: String(b.url || ""),
+    author: String(b.author || ""),
+    theme: String(b.theme || ""),
+    season: SEASONS.some((s) => s.n === b.season) ? b.season : ALL_YEAR,
+    difficulty: DIFFS.includes(b.difficulty) ? b.difficulty : "Facile",
+    edition: EDITIONS.includes(b.edition) ? b.edition : "Les deux",
+    notes: String(b.notes || ""),
+    sample: !!b.sample,
+    materials: Array.isArray(b.materials)
+      ? b.materials.map((m, i) => ({ id: String(m.id || uid() + i), text: String(m.text || ""), done: !!m.done })).filter((m) => m.text)
+      : [],
+  };
+}
+
+function splitQty(text) {
+  const m = text.match(/^(\d+)\s*(?:[x×]\s*)?(.+)$/i);
+  if (m && m[2]) return { qty: m[1], name: m[2] };
+  return { qty: "", name: text };
+}
+
+
+
+/* ===================== Emojis de thèmes et icônes de blocs ===================== */
+const norm = (s) => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const THEME_EMOJI = Object.fromEntries(CATEGORIES.flatMap((g) => g.items));
+const THEME_HINTS = [...CATEGORIES.flatMap((g) => g.items).map(([n, e]) => [norm(n), e]), ["japon", "⛩️"], ["deco", "🎨"], ["pixel", "🖼️"], ["survie", "⛺"], ["spooky", "👻"], ["fantom", "👻"]];
+function themeEmoji(t) {
+  if (THEME_EMOJI[t]) return THEME_EMOJI[t];
+  const n = norm(t);
+  const hit = THEME_HINTS.find(([k]) => n.includes(k));
+  return hit ? hit[1] : "🧱";
+}
+
+const COL = {
+  orange: ["#E8791A", "#F5A04A", "#C25C0A"], noir: ["#26262B", "#37373E", "#16161A"], blanc: ["#EBEBEB", "#FFFFFF", "#CBCBCB"],
+  rouge: ["#B02E26", "#CE4A40", "#8A211B"], bleu: ["#3C44AA", "#5662CC", "#2D3488"], vert: ["#5E7C16", "#79A023", "#486111"],
+  jaune: ["#F5C21B", "#FFDB55", "#D19F0E"], gris: ["#7D7D7D", "#9B9B9B", "#626262"], marron: ["#835432", "#9E6A42", "#6A4228"],
+  rose: ["#ED8DAC", "#F7AFC6", "#C96A8A"], violet: ["#7B2FBE", "#9650D6", "#5F2294"], cyan: ["#157788", "#1E9AB0", "#0F5A68"],
+};
+const WOOD = {
+  "chene sombre": ["#4B3322", "#5F4430", "#3A281A"], acacia: ["#A85A32", "#BC6F44", "#8E4A27"], paletuvier: ["#76363A", "#8D474B", "#5E2A2D"],
+  bouleau: ["#D5C98C", "#E4DAA5", "#BBAF73"], sapin: ["#7A5A37", "#8F6C45", "#654A2C"], jungle: ["#B88764", "#CB9C78", "#9C7050"],
+  chene: ["#B8945F", "#CBAA74", "#9F7F4C"],
+};
+const STONE = ["#7F7F7F", "#9A9A9A", "#656565"];
+
+function rngFrom(seed) {
+  let h = 2166136261;
+  for (const ch of seed) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  h = h >>> 0 || 1;
+  return () => { h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0; return (h % 1000) / 1000; };
+}
+const G = () => Array.from({ length: 8 }, () => Array(8).fill(null));
+const each = (fn) => { for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) fn(x, y); };
+const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+const put = (g, pts, c) => pts.forEach(([x, y]) => { if (g[y] && x >= 0 && x < 8) g[y][x] = c; });
+
+const T = {
+  noise(p, r) { const g = G(); each((x, y) => { const v = r(); g[y][x] = v < 0.2 ? p[2] : v > 0.8 ? p[1] : p[0]; }); return g; },
+  flat(p) { const g = G(); each((x, y) => { g[y][x] = p[0]; }); each((x, y) => { if (x === 0 || y === 0) g[y][x] = p[1]; }); return g; },
+  planks(p) {
+    const g = G();
+    each((x, y) => { g[y][x] = p[0]; });
+    for (let x = 0; x < 8; x++) { g[3][x] = p[2]; g[7][x] = p[2]; g[0][x] = p[1]; g[4][x] = p[1]; }
+    [0, 1, 2].forEach((y) => { g[y][y % 2 ? 2 : 5] = p[2]; });
+    [4, 5, 6].forEach((y) => { g[y][y % 2 ? 5 : 2] = p[2]; });
+    return g;
+  },
+  log(p) {
+    const g = G();
+    each((x, y) => { const d = Math.max(Math.abs(x - 3.5), Math.abs(y - 3.5)); g[y][x] = d >= 3 ? p[2] : d >= 2 ? p[0] : d >= 1 ? p[1] : p[0]; });
+    return g;
+  },
+  glass(p) {
+    const g = G();
+    each((x, y) => { g[y][x] = hexA(p[0], 0.22); });
+    for (let i = 0; i < 8; i++) { g[0][i] = hexA(p[1], 0.95); g[7][i] = hexA(p[1], 0.95); g[i][0] = hexA(p[1], 0.95); g[i][7] = hexA(p[1], 0.95); }
+    put(g, [[2, 2], [3, 3], [2, 4], [4, 2]], "rgba(255,255,255,.85)");
+    return g;
+  },
+  pumpkin(r) {
+    const g = T.noise(COL.orange, r);
+    for (let y = 0; y < 8; y++) { g[y][2] = COL.orange[2]; g[y][5] = COL.orange[2]; }
+    put(g, [[3, 0], [4, 0], [3, 1]], "#5E7C16");
+    return g;
+  },
+  hay(r) {
+    const g = G(); const p = ["#D8B433", "#E8CB55", "#B8921E"];
+    each((x, y) => { const v = r(); g[y][x] = y === 2 || y === 5 ? "#8E6B1E" : v < 0.25 ? p[2] : v > 0.75 ? p[1] : p[0]; });
+    return g;
+  },
+  cobweb() { const g = G(); for (let i = 0; i < 8; i++) { g[i][i] = "#F4F4F4"; g[i][7 - i] = "#F4F4F4"; } put(g, [[3, 1], [4, 1], [1, 3], [1, 4], [6, 3], [6, 4], [3, 6], [4, 6]], "#DADADA"); return g; },
+  candle() { const g = G(); for (let y = 3; y < 8; y++) { g[y][3] = "#F2EBDD"; g[y][4] = "#D9CFB8"; } put(g, [[3, 2]], "#3A3A3A"); put(g, [[3, 1], [4, 1]], "#FFC83D"); put(g, [[3, 0]], "#FF9A1F"); return g; },
+  lantern() {
+    const g = G();
+    put(g, [[3, 0], [4, 0]], "#3A3A3F");
+    for (let x = 2; x <= 5; x++) { g[1][x] = "#3A3A3F"; g[6][x] = "#3A3A3F"; }
+    for (let y = 2; y <= 5; y++) { g[y][2] = "#3A3A3F"; g[y][5] = "#3A3A3F"; g[y][3] = "#FFC24A"; g[y][4] = "#FFE08A"; }
+    return g;
+  },
+  torch() { const g = G(); for (let y = 3; y < 8; y++) { g[y][3] = "#8A5A2B"; g[y][4] = "#6E4721"; } put(g, [[3, 2], [4, 2]], "#FF6A1A"); put(g, [[3, 1], [4, 1]], "#FF9A1F"); put(g, [[3, 0], [4, 0]], "#FFD54A"); return g; },
+  dust() { const g = G(); put(g, [[0, 5], [1, 5], [2, 4], [3, 4], [4, 3], [5, 3], [6, 2], [7, 2], [2, 5], [5, 4], [4, 4]], "#C41E14"); put(g, [[1, 6], [3, 5], [6, 3], [5, 2]], "#7E100B"); return g; },
+  bone() { const g = G(); put(g, [[1, 6], [2, 5], [3, 4], [4, 3], [5, 2], [6, 1]], "#EDE8D6"); put(g, [[2, 6], [3, 5], [4, 4], [5, 3], [6, 2]], "#C9C4AE"); put(g, [[0, 6], [1, 7], [6, 0], [7, 1], [0, 7], [7, 0]], "#EDE8D6"); return g; },
+  bonebloc(r) { const g = T.noise(["#E6E1CC", "#F4F0DF", "#C9C4AE"], r); for (let y = 0; y < 8; y++) { g[y][2] = "#C9C4AE"; g[y][5] = "#C9C4AE"; } return g; },
+  skull() { const g = G(); for (let y = 1; y <= 5; y++) for (let x = 1; x <= 6; x++) g[y][x] = "#DAD7C9"; for (let x = 2; x <= 5; x++) g[6][x] = "#BDB9A8"; put(g, [[2, 3], [3, 3], [4, 3], [5, 3]], "#2A2A2A"); put(g, [[3, 5], [4, 5]], "#8C897C"); return g; },
+  book() { const g = G(); for (let y = 1; y <= 6; y++) for (let x = 1; x <= 6; x++) g[y][x] = "#7A4A2A"; for (let y = 1; y <= 6; y++) { g[y][1] = "#5C361C"; g[y][6] = "#EFE6C8"; } put(g, [[3, 3], [4, 3], [3, 4]], "#D8B84A"); return g; },
+  chain() { const g = G(); put(g, [[3, 0], [4, 1], [3, 2], [4, 3], [3, 4], [4, 5], [3, 6], [4, 7]], "#8B939E"); put(g, [[4, 0], [3, 1], [4, 2], [3, 3], [4, 4], [3, 5], [4, 6], [3, 7]], "#5F6670"); return g; },
+  seeds() { const g = G(); put(g, [[2, 3], [3, 3], [5, 2], [4, 5], [5, 5], [2, 6], [6, 4]], "#CDBB7A"); put(g, [[2, 4], [3, 4], [5, 3], [4, 6], [5, 6], [2, 7], [6, 5]], "#8A7A3F"); return g; },
+  bucket() { const g = G(); for (let y = 2; y <= 7; y++) { const w = y < 4 ? 3 : 2; for (let x = 4 - w; x < 4 + w; x++) g[y][x] = "#9AA0A8"; } for (let x = 1; x <= 6; x++) g[2][x] = "#B8BEC6"; put(g, [[2, 2], [3, 2], [4, 2], [5, 2]], "#3B6FD8"); put(g, [[1, 1], [6, 1]], "#6E747C"); return g; },
+  cauldron() { const g = G(); for (let y = 2; y <= 6; y++) for (let x = 1; x <= 6; x++) g[y][x] = "#3A3A3F"; for (let x = 2; x <= 5; x++) g[2][x] = "#3B5BD0"; put(g, [[1, 7], [6, 7]], "#26262A"); put(g, [[1, 3], [1, 4]], "#55555C"); return g; },
+  plant(r) { const g = G(); each((x, y) => { if (r() > 0.45) g[y][x] = r() > 0.5 ? "#5E8F2A" : "#7DB43B"; }); return g; },
+  sign() { const g = G(); for (let y = 1; y <= 4; y++) for (let x = 0; x < 8; x++) g[y][x] = y === 1 || y === 4 ? "#A8823F" : "#BC9650"; for (let y = 5; y < 8; y++) { g[y][3] = "#6E4721"; g[y][4] = "#6E4721"; } return g; },
+  banner() { const g = G(); for (let y = 0; y < 8; y++) g[y][0] = "#6E4721"; for (let y = 1; y <= 6; y++) for (let x = 1; x <= 6; x++) g[y][x] = "#F0F0F0"; put(g, [[2, 3], [5, 3], [3, 5], [4, 5]], "#1D1D21"); return g; },
+  creeper(r) { const g = T.noise(COL.vert, r); put(g, [[1, 2], [2, 2], [5, 2], [6, 2], [1, 3], [2, 3], [5, 3], [6, 3], [3, 4], [4, 4], [3, 5], [4, 5], [2, 6], [5, 6]], "#161616"); return g; },
+  fence(p) { const g = G(); for (let y = 0; y < 8; y++) { g[y][1] = p[0]; g[y][2] = p[2]; g[y][5] = p[0]; g[y][6] = p[2]; } for (let x = 0; x < 8; x++) { g[2][x] = p[1]; g[5][x] = p[1]; } return g; },
+  piston(r) { const g = T.noise(STONE, r); for (let y = 0; y < 3; y++) for (let x = 0; x < 8; x++) g[y][x] = y === 0 ? "#CBAA74" : "#B8945F"; for (let y = 3; y < 8; y++) { g[y][3] = "#5A5A5A"; g[y][4] = "#5A5A5A"; } return g; },
+  dye(p) { const g = G(); for (let y = 2; y <= 5; y++) for (let x = 2; x <= 5; x++) g[y][x] = p[0]; put(g, [[2, 2], [5, 2], [2, 5], [5, 5]], null); put(g, [[3, 3], [3, 2]], p[1]); return g; },
+};
+function shape(g, kind) {
+  if (kind === "slab") for (let y = 0; y < 4; y++) for (let x = 0; x < 8; x++) g[y][x] = null;
+  if (kind === "stair") for (let y = 0; y < 4; y++) for (let x = 0; x < 4; x++) g[y][x] = null;
+  return g;
+}
+const firstColor = (n) => Object.keys(COL).find((k) => new RegExp("\\b" + k).test(n)) || "";
+const woodOf = (n) => Object.keys(WOOD).find((k) => n.includes(k)) || (/planche|rondin|bois|barriere|chene|escalier|dalle/.test(n) ? "chene" : "");
+const shapeOf = (n) => (/\bdalle\b/.test(n) ? "slab" : /\bescalier\b/.test(n) ? "stair" : "");
+
+function makeGrid(name) {
+  const n = norm(name);
+  const r = rngFrom(n);
+  const col = firstColor(n);
+  const P = COL[col] || COL.gris;
+  if (/creeper/.test(n)) return T.creeper(r);
+  if (/crane|squelette/.test(n)) return T.skull();
+  if (/bloc d.os/.test(n)) return T.bonebloc(r);
+  if (/\bos\b|\bosse/.test(n)) return T.bone();
+  if (/graine/.test(n)) return T.seeds();
+  if (/citrouille/.test(n)) return T.pumpkin(r);
+  if (/foin/.test(n)) return T.hay(r);
+  if (/toile/.test(n)) return T.cobweb();
+  if (/bougie/.test(n)) return T.candle();
+  if (/lanterne/.test(n)) return T.lantern();
+  if (/torche/.test(n)) return T.torch();
+  if (/redstone/.test(n)) return T.dust();
+  if (/piston/.test(n)) return T.piston(r);
+  if (/panneau/.test(n)) return T.sign();
+  if (/banniere/.test(n)) return T.banner();
+  if (/chaine/.test(n)) return T.chain();
+  if (/chaudron/.test(n)) return T.cauldron();
+  if (/seau/.test(n)) return T.bucket();
+  if (/livre|lutrin/.test(n)) return T.book();
+  if (/colorant/.test(n)) return T.dye(P);
+  if (/lichen|cornichon/.test(n)) return T.plant(r);
+  if (/verre|vitre/.test(n)) return T.glass(col ? P : ["#9ED8E8", "#CFEFF7", "#7FB9C9"]);
+  if (/sable des ames/.test(n)) return T.noise(["#5A4636", "#6E5846", "#473529"], r);
+  if (/sable/.test(n)) return T.noise(["#DCCB92", "#EADBA6", "#C8B77E"], r);
+  if (/terre cuite/.test(n)) return T.noise([P[2], P[0], P[2]], r);
+  if (/beton/.test(n)) return T.flat(P);
+  if (/laine/.test(n)) return T.noise(P, r);
+  if (/gres rouge/.test(n)) return T.noise(["#B5551E", "#C96A2E", "#9A4515"], r);
+  const w = woodOf(n);
+  if (w) {
+    if (/rondin|tronc/.test(n)) return T.log(WOOD[w]);
+    if (/barriere/.test(n)) return T.fence(WOOD[w]);
+    return shape(T.planks(WOOD[w]), shapeOf(n));
+  }
+  if (/pierre|roche|cobble|stone/.test(n)) return shape(T.noise(STONE, r), shapeOf(n));
+  if (/\bterre\b|\bterre labouree/.test(n)) return T.noise(["#866043", "#9B7452", "#6B4A32"], r);
+  const keys = Object.keys(COL);
+  return T.noise(col ? P : COL[keys[Math.floor(r() * keys.length)]], r);
+}
+
+const BI_CACHE = new Map();
+function blockIcon(name) {
+  const key = norm(name);
+  if (BI_CACHE.has(key)) return BI_CACHE.get(key);
+  const g = makeGrid(name);
+  let rects = "";
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if (g[y][x]) rects += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${g[y][x]}"/>`;
+  const out = `<svg class="bi" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">${rects}</svg>`;
+  BI_CACHE.set(key, out);
+  return out;
+}
+
+/* ===================== Exemples (automne et Halloween) ===================== */
+const YT = (id) => "https://www.youtube.com/watch?v=" + id;
+const YS = (q) => "https://www.youtube.com/results?search_query=" + encodeURIComponent(q);
+const EST = "Liste de départ estimée, à ajuster d'après la vidéo.";
+function sampleBuilds() {
+  const now = Date.now();
+  const mk = (i, o, mats, doneCount = 0) => normalize({
+    id: "sample-" + i, createdAt: now - i * 1000, sample: true, edition: "Les deux", ...o,
+    materials: mats.map((t, k) => ({ id: "sample-" + i + "-" + k, text: t, done: k < doneCount })),
+  });
+  return [
+    mk(0, { title: "Maison citrouille géante", url: YT("xKVl6OhizSI"), theme: "Maison", season: "Halloween", difficulty: "Moyen",
+      notes: "Contour orange, yeux noirs, fenêtres en verre teinté. Détails : toiles, bougies, chaînes. Finis avec des cornichons de mer pour la lueur.\n" + EST },
+      ["200 Laine orange", "150 Béton orange", "40 Rondin d'acacia écorcé", "30 Grès rouge taillé", "40 Béton noir", "24 Vitres teintées", "12 Toile d'araignée", "16 Bougie", "8 Chaîne", "8 Lichen lumineux", "6 Cornichon de mer"]),
+    mk(1, { title: "Fantômes en verre", url: YT("7_WIzgiRYuU"), theme: "Décoration", season: "Halloween", difficulty: "Facile", status: "Terminé",
+      notes: "Matériaux pour un seul fantôme. Une bannière blanche avec un visage de creeper noir sert de visage.\n" + EST },
+      ["6 Verre blanc", "6 Vitres blanches", "1 Bannière blanche", "1 Colorant noir", "1 Tête de creeper"], 5),
+    mk(2, { title: "Cimetière de squelettes", url: YT("8G5LZqBEJRY"), theme: "Décoration", season: "Halloween", difficulty: "Moyen",
+      notes: "Pierres tombales, os qui sortent du sol, feu des âmes, bougies et lanternes.\n" + EST },
+      ["30 Pierre lisse", "20 Escalier en pierre", "12 Bloc d'os", "6 Crâne de squelette", "8 Sable des âmes", "10 Toile d'araignée", "12 Bougie", "6 Lanterne", "6 Panneau"]),
+    mk(3, { title: "Lieu de rituel sombre", url: YT("flqunetwxj8"), author: "TypeCraft", theme: "Décoration", season: "Halloween", difficulty: "Facile",
+      notes: "Lutrins à moitié enterrés avec livres, entourés de terre cuite noire et de redstone.\n" + EST },
+      ["4 Lutrin", "4 Livre et plume", "40 Terre cuite noire", "24 Poudre de redstone", "16 Bougie"]),
+    mk(4, { title: "Labyrinthe de bottes de foin", url: YT("4D4ts4SkcVU"), theme: "Décoration", season: "Automne", difficulty: "Moyen",
+      notes: "Un labyrinthe avec citrouilles, toiles d'araignée, pièges et bonbons cachés.\n" + EST },
+      ["300 Botte de foin", "24 Citrouille", "30 Toile d'araignée", "12 Torche", "8 Piston", "20 Poudre de redstone"]),
+    mk(5, { title: "Cottage d'automne", url: YS("minecraft autumn cottage tutorial"), theme: "Maison", season: "Automne", difficulty: "Facile", status: "En cours",
+      notes: "Lien de recherche : choisis la vidéo qui te plaît, puis remplace le lien avec le crayon.\n" + EST },
+      ["64 Rondin de chêne", "96 Planche de chêne", "48 Escalier en chêne sombre", "32 Dalle de chêne sombre", "30 Terre cuite orange", "20 Citrouille", "12 Botte de foin", "8 Lanterne", "16 Vitres"], 3),
+    mk(6, { title: "Ferme de citrouilles et de pastèques", url: YS("minecraft pumpkin melon farm autumn build"), theme: "Ferme", season: "Automne", difficulty: "Facile",
+      notes: "Lien de recherche : choisis la vidéo qui te plaît, puis remplace le lien avec le crayon.\n" + EST },
+      ["6 Graine de citrouille", "6 Graine de pastèque", "60 Botte de foin", "40 Barrière en chêne", "4 Seau d'eau", "24 Terre", "8 Torche"]),
+    mk(7, { title: "Cabane de sorcière dans le marais", url: YS("minecraft witch hut swamp build tutorial"), theme: "Fantasy", season: "Halloween", difficulty: "Moyen",
+      notes: "Lien de recherche : choisis la vidéo qui te plaît, puis remplace le lien avec le crayon.\n" + EST },
+      ["80 Planche de palétuvier", "40 Rondin de chêne sombre", "24 Dalle de palétuvier", "1 Chaudron", "6 Toile d'araignée", "8 Lanterne des âmes", "8 Bougie"]),
+  ];
+}
+
+/* ===================== Données ===================== */
+let builds = [];
+function load() {
+  try {
+    const r = localStorage.getItem(KEY);
+    if (r === null) { builds = sampleBuilds(); persist(); }
+    else builds = JSON.parse(r).map(normalize);
+  } catch (e) {
+    builds = sampleBuilds();
+  }
+}
+function persist() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(builds));
+  } catch (e) {
+    toast("Sauvegarde impossible sur cet appareil.");
+  }
+}
+const getBuild = (id) => builds.find((b) => b.id === id);
+function upsert(b) {
+  const i = builds.findIndex((x) => x.id === b.id);
+  if (i >= 0) builds[i] = b; else builds.unshift(b);
+  persist();
+}
+
+/* ===================== Etat de l'écran ===================== */
+const st = { q: "", tab: "Tous", f: { theme: "", season: "", difficulty: "", edition: "" } };
+const FLABEL = { theme: "Catégorie", season: "Saison", difficulty: "Difficulté", edition: "Édition" };
+
+const knownThemes = () => Array.from(new Set(builds.map((b) => b.theme).filter(Boolean))).sort((a, b) => a.localeCompare(b, "fr"));
+const activeFilterCount = () => Object.values(st.f).filter(Boolean).length;
+
+function matches(b, ignoreTab) {
+  if (!ignoreTab && st.tab !== "Tous" && b.status !== st.tab) return false;
+  if (st.f.theme && b.theme !== st.f.theme) return false;
+  if (st.f.season && b.season !== st.f.season) return false;
+  if (st.f.difficulty && b.difficulty !== st.f.difficulty) return false;
+  if (st.f.edition && b.edition !== st.f.edition && b.edition !== "Les deux") return false;
+  const s = st.q.trim().toLowerCase();
+  if (s) {
+    const hay = [b.title, b.author, b.theme, b.notes, b.season, ...b.materials.map((m) => m.text)].join(" ").toLowerCase();
+    if (!hay.includes(s)) return false;
+  }
+  return true;
+}
+const filtered = () => builds.filter((b) => matches(b)).sort((a, b) => b.createdAt - a.createdAt);
+
+/* ===================== Rendu de la liste ===================== */
+function tagsHTML(b, solid) {
+  const out = [];
+  if (b.theme) out.push(`<span class="tag" style="--c:var(--grass)">${themeEmoji(b.theme)} ${esc(b.theme)}</span>`);
+  if (b.season !== ALL_YEAR) out.push(`<span class="tag" style="--c:${seasonColor(b.season)}">${seasonEmoji(b.season)} ${esc(b.season)}</span>`);
+  const lvl = DIFFS.indexOf(b.difficulty) + 1;
+  out.push(`<span class="diff" role="img" aria-label="Difficulté : ${esc(b.difficulty)}" title="${esc(b.difficulty)}">${[1, 2, 3].map((i) => `<i class="${i <= lvl ? "on" : ""}"></i>`).join("")}</span>`);
+  if (solid) out.push(`<span class="tag" style="--c:var(--line)">${esc(b.edition)}</span>`);
+  if (b.sample) out.push(`<span class="tag" style="--c:var(--soft)">Exemple</span>`);
+  return out.join("");
+}
+
+function thumbHTML(b) {
+  const v = parseVideo(b.url);
+  const img = v.kind === "youtube" ? `<img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="" loading="lazy" onerror="this.remove()">` : "";
+  const label = PLATFORM[v.kind];
+  const emo = b.season !== ALL_YEAR ? seasonEmoji(b.season) : b.theme ? themeEmoji(b.theme) : "🧱";
+  return `<div class="thumb"><span class="emo">${emo}</span>${img}${label ? `<span class="plat">${label}</span>` : ""}</div>`;
+}
+
+function cardHTML(b) {
+  const done = b.materials.filter((m) => m.done).length;
+  const total = b.materials.length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  return `<button type="button" class="card" data-open="${esc(b.id)}">
+    ${thumbHTML(b)}
+    <div class="cbody">
+      <h3>${esc(b.title)}</h3>
+      <div class="tags">${tagsHTML(b)}</div>
+      ${total ? `<div class="mini" aria-hidden="true">${b.materials.slice(0, 5).map((m) => blockIcon(splitQty(m.text).name)).join("")}${total > 5 ? `<span class="more">+${total - 5}</span>` : ""}</div>` : ""}
+      <div class="cmeta">
+        ${total ? `<div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div><span>${done}/${total}</span>` : `<span>Matériaux à ajouter</span>`}
+        <span class="tag solid" style="--c:${statusColor(b.status)};margin-left:auto">${statusEmoji(b.status)} ${esc(b.status)}</span>
+      </div>
+    </div>
+  </button>`;
+}
+
+function renderTabs() {
+  const base = builds.filter((b) => matches(b, true));
+  const count = (n) => (n === "Tous" ? base.length : base.filter((b) => b.status === n).length);
+  const tabs = [{ n: "Tous", label: "Tous", e: "📚" }, ...STATUSES.map((s) => ({ n: s.n, label: s.plural, e: s.e }))];
+  $("#tabs").innerHTML = tabs
+    .map((t) => `<button type="button" class="tab" data-tab="${esc(t.n)}" aria-pressed="${st.tab === t.n}"><b>${count(t.n)}</b><span class="tl">${t.e} ${esc(t.label)}</span></button>`)
+    .join("");
+}
+
+function renderChips() {
+  $("#activeChips").innerHTML = Object.entries(st.f)
+    .filter(([, v]) => v)
+    .map(([k, v]) => `<button type="button" class="fchip" data-clear="${k}" aria-label="Retirer le filtre ${esc(v)}">${k === "theme" ? themeEmoji(v) + " " : k === "season" ? seasonEmoji(v) + " " : ""}${esc(v)}<span class="x">${I.x}</span></button>`)
+    .join("");
+  const n = activeFilterCount();
+  $("#btnFilters").innerHTML = I.filter + (n ? `<span class="badge">${n}</span>` : "");
+}
+
+function renderBanner() {
+  const el = $("#banner");
+  const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  const dismissed = (() => { try { return localStorage.getItem(DISMISS_KEY) === "1"; } catch (e) { return false; } })();
+  if (standalone || dismissed || !(deferredPrompt || isIOS())) { el.innerHTML = ""; return; }
+  el.innerHTML = `<div class="banner">
+    <span style="color:var(--grass)">${I.phone.replace("<svg", '<svg width="28" height="28"')}</span>
+    <p>Installe l'application pour l'ouvrir comme une vraie appli.</p>
+    <button type="button" class="blk sm" data-act="install">Installer</button>
+    <button type="button" class="x" data-act="dismiss-banner" aria-label="Fermer">${I.x}</button>
+  </div>`;
+}
+
+function renderList() {
+  const list = filtered();
+  const done = builds.filter((b) => b.status === "Terminé").length;
+  $("#subtitle").textContent = builds.length
+    ? `${builds.length} build${builds.length > 1 ? "s" : ""} · ${done} terminé${done > 1 ? "s" : ""}`
+    : "Tes tutoriels, au même endroit";
+  renderTabs();
+  renderChips();
+  renderBanner();
+
+  const el = $("#list");
+  if (!builds.length) {
+    el.innerHTML = `<div class="empty">
+      <div class="blocks" aria-hidden="true">${["Citrouille", "Botte de foin", "Planche de chêne", "Pierre", "Bougie"].map(blockIcon).join("")}</div>
+      <h2>Ton carnet est vide</h2>
+      <p>Garde tes meilleurs tutoriels au même endroit.</p>
+      <ol class="steps">
+        <li><span class="n">1</span>Trouve une vidéo de build</li>
+        <li><span class="n">2</span>Colle son lien ici</li>
+        <li><span class="n">3</span>Note les matériaux à réunir</li>
+      </ol>
+      <button type="button" class="blk" data-act="new">${I.plus}Ajouter mon premier build</button>
+    </div>`;
+  } else if (!list.length) {
+    el.innerHTML = `<div class="empty">
+      <h2>Aucun résultat</h2>
+      <p>Aucun build ne correspond à ta recherche.</p>
+      <p style="margin-top:14px"><button type="button" class="blk ghost sm" data-act="reset-all">Tout afficher</button></p>
+    </div>`;
+  } else {
+    el.innerHTML = list.map(cardHTML).join("");
+  }
+  $("#fab").style.display = builds.length ? "" : "none";
+}
+
+/* ===================== Pages et feuilles ===================== */
+const pageEl = $("#page");
+const sheetEl = $("#sheet");
+let pageOpen = false;
+let sheetOpen = false;
+let currentId = null;
+let draft = null;
+
+function openPage() {
+  if (!pageOpen) {
+    pageOpen = true;
+    history.pushState({ l: "page" }, "");
+    pageEl.classList.add("open");
+    document.body.classList.add("lock");
+  }
+  const sc = $(".pagescroll", pageEl);
+  if (sc) sc.scrollTop = 0;
+}
+function closePageUI() {
+  pageOpen = false;
+  currentId = null;
+  draft = null;
+  pageEl.classList.remove("open");
+  pageEl.innerHTML = "";
+  document.body.classList.remove("lock");
+  renderList();
+}
+function openSheet(inner) {
+  sheetEl.innerHTML = `<div class="scrim" data-act="close-sheet"></div><div class="panel" role="dialog" aria-modal="true"><div class="grab"></div><div id="sheetInner">${inner}</div></div>`;
+  if (!sheetOpen) {
+    sheetOpen = true;
+    history.pushState({ l: "sheet" }, "");
+    sheetEl.classList.add("open");
+  }
+}
+function closeSheetUI() {
+  sheetOpen = false;
+  sheetEl.classList.remove("open");
+  sheetEl.innerHTML = "";
+}
+window.addEventListener("popstate", () => {
+  if (sheetOpen) closeSheetUI();
+  else if (pageOpen) closePageUI();
+});
+const goBack = () => history.back();
+
+/* ---------- Message temporaire ---------- */
+let toastTimer = null;
+let toastAction = null;
+function toast(msg, actionLabel, action) {
+  const el = $("#toast");
+  toastAction = action || null;
+  el.innerHTML = `<span>${esc(msg)}</span>${actionLabel ? `<button type="button" data-act="toast-action">${esc(actionLabel)}</button>` : ""}`;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), actionLabel ? 6000 : 2800);
+}
+$("#toast").addEventListener("click", (e) => {
+  if (e.target.closest("[data-act='toast-action']") && toastAction) {
+    toastAction();
+    toastAction = null;
+    $("#toast").classList.remove("show");
+  }
+});
+
+/* ===================== Fiche d'un build ===================== */
+function videoHTML(b) {
+  const v = parseVideo(b.url);
+  if (v.kind === "youtube") {
+    return `<div class="video"><iframe title="${esc(b.title)}" src="https://www.youtube-nocookie.com/embed/${v.id}?playsinline=1&rel=0" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div>
+      <a class="sublink" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">Ouvrir dans YouTube</a>`;
+  }
+  if (v.kind === "ytsearch") {
+    return `<a class="videocard" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">
+      <span class="play">${I.search.replace("<svg", '<svg width="24" height="24"')}</span>
+      <span class="vt">Chercher la vidéo sur YouTube<small>Choisis un tutoriel, puis colle son lien avec le crayon</small></span>
+    </a>`;
+  }
+  const label = PLATFORM[v.kind] || "le site";
+  return `<a class="videocard" href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">
+    <span class="play">${I.play}</span>
+    <span class="vt">Regarder la vidéo<small>Ouvre ${esc(label)} dans un nouvel onglet</small></span>
+  </a>`;
+}
+
+function materialsInner(b) {
+  if (!b.materials.length) return `<p class="nomat">Aucun matériau noté. Touche le crayon en haut pour en ajouter.</p>`;
+  const rows = b.materials.map((m) => {
+    const { qty, name } = splitQty(m.text);
+    return `<li><button type="button" class="mrow${m.done ? " done" : ""}" data-act="check" data-mid="${esc(m.id)}" aria-pressed="${m.done}">
+      <span class="box">${m.done ? I.check : ""}</span>
+      <span class="bic">${blockIcon(name)}</span>
+      ${qty ? `<span class="qty">${esc(qty)}</span>` : ""}
+      <span class="mt">${esc(name)}</span>
+    </button></li>`;
+  }).join("");
+  const anyDone = b.materials.some((m) => m.done);
+  return `<ul id="mlist">${rows}</ul>${anyDone ? `<button type="button" class="reset" data-act="uncheck-all">Tout décocher</button>` : ""}`;
+}
+
+function refreshMaterials(b) {
+  const done = b.materials.filter((m) => m.done).length;
+  const total = b.materials.length;
+  const bar = $("#mbar");
+  if (bar) bar.style.width = (total ? Math.round((done / total) * 100) : 0) + "%";
+  const cnt = $("#mcount");
+  if (cnt) cnt.textContent = total ? `${done} sur ${total}` : "";
+  const wrap = $("#mwrap");
+  if (wrap) wrap.innerHTML = materialsInner(b);
+}
+
+function showDetail(id) {
+  const b = getBuild(id);
+  if (!b) return;
+  currentId = id;
+  draft = null;
+  const total = b.materials.length;
+  pageEl.innerHTML = `
+    <div class="pagebar">
+      <button type="button" class="iconbtn" data-act="back" aria-label="Retour">${I.back}</button>
+      <div class="pagetitle">${esc(b.title)}</div>
+      <button type="button" class="iconbtn" data-act="edit" aria-label="Modifier">${I.pencil}</button>
+    </div>
+    <div class="pagescroll"><div class="pagebody">
+      ${videoHTML(b)}
+      <h2 class="dtitle">${esc(b.title)}</h2>
+      ${b.author ? `<p class="by">par ${esc(b.author)}</p>` : ""}
+      <div class="tags" style="margin-top:12px">${tagsHTML(b, true)}</div>
+
+      <section class="block">
+        <h3>Avancement</h3>
+        <div class="seg2">${STATUSES.map((s) => `<button type="button" style="--c:${s.c}" data-act="status" data-s="${esc(s.n)}" aria-pressed="${b.status === s.n}">${s.e} ${esc(s.n)}</button>`).join("")}</div>
+      </section>
+
+      <section class="block">
+        <div class="rowhead"><h3>Matériaux à réunir</h3><span id="mcount"></span></div>
+        ${total ? `<div class="bar big" aria-hidden="true"><i id="mbar"></i></div>` : ""}
+        <div id="mwrap"></div>
+      </section>
+
+      ${b.notes ? `<section class="block"><h3>Notes</h3><div class="notes">${esc(b.notes)}</div></section>` : ""}
+    </div></div>`;
+  openPage();
+  refreshMaterials(b);
+}
+
+
+
+/* ===================== Thèmes (saisons et fêtes) ===================== */
+const THEME_KEY = "carnet-theme";
+
+const SPR = {
+  pumpkin: { pal: { o: "#F08A24", K: "#2A1A3A", g: "#5E8F2A" }, rows: ["....g....", "...gg....", ".ooooooo.", "ooooooooo", "ooKoooKoo", "oooKKKooo", "oKooKooKo", ".ooooooo."] },
+  bat: { pal: { K: "#2A1A3A" }, rows: ["K.......K", "KK.K.K.KK", "KKKKKKKKK", ".KKK.KKK.", "..K...K.."] },
+  ghost: { pal: { W: "#F2EEFA", K: "#3A2A55" }, rows: [".WWWWW.", "WWWWWWW", "WKWWWKW", "WKWWWKW", "WWWWWWW", "WWWWWWW", "WWWWWWW", "WW.W.WW"] },
+  leaf: { pal: { o: "#E07B1A", b: "#7A4A22", v: "#B8531C" }, rows: ["...o...", "..ooo..", ".ooooo.", "ooovooo", ".ooooo.", "..ooo..", "...b..."] },
+  snow: { pal: { w: "#FFFFFF" }, rows: ["...w...", ".w.w.w.", "..www..", "wwwwwww", "..www..", ".w.w.w.", "...w..."] },
+  tree: { pal: { g: "#2E7D4A", b: "#6E4721", y: "#F5C84C", r: "#D6453D" }, rows: ["...y...", "..ggg..", ".ggrgg.", "..ggg..", ".gggrg.", "ggggggg", "ggrgggg", "...b...", "...b..."] },
+  gift: { pal: { r: "#C8352B", g: "#F5C84C" }, rows: ["..g.g..", "...g...", "rrrgrrr", "rrrgrrr", "ggggggg", "rrrgrrr", "rrrgrrr"] },
+  heart: { pal: { r: "#E0457B" }, rows: [".rr.rr.", "rrrrrrr", "rrrrrrr", ".rrrrr.", "..rrr..", "...r..."] },
+  egg: { pal: { p: "#F29BC3", y: "#FFE27A" }, rows: ["..pp..", ".pppp.", "pppppp", "pyyyyp", "pppppp", "pyyyyp", ".pppp.", "..pp.."] },
+  sun: { pal: { y: "#FFC21A" }, rows: ["....y....", ".y..y..y.", "..yyyyy..", "..yyyyy..", "yyyyyyyyy", "..yyyyy..", "..yyyyy..", ".y..y..y.", "....y...."] },
+  cloud: { pal: { w: "#FFFFFF" }, rows: ["..www....", ".wwwwww..", "wwwwwwwww", ".wwwwwww."] },
+  wave: { pal: { b: "#2AA7C9" }, rows: ["..bb...bb", ".b..b.b..", "b....b..."] },
+  flower: { pal: { p: "#F29BC3", y: "#FFD84A" }, rows: ["..p..", ".ppp.", "ppypp", ".ppp.", "..p.."] },
+  star: { pal: { y: "#FFC21A" }, rows: ["..y..", "..y..", "yyyyy", "..y..", "..y.."] },
+  firework: { pal: { y: "#FFC21A", o: "#FF6F91" }, rows: ["....y....", ".y..y..y.", "..y.y.y..", "...yyy...", "yyyyoyyyy", "...yyy...", "..y.y.y..", ".y..y..y.", "....y...."] },
+};
+const POS = [[16, 14], [104, 36], [184, 10], [56, 92], [150, 104], [10, 140], [100, 176], [188, 176], [44, 206]];
+
+function wallTile(list, opacity) {
+  let rects = "";
+  list.forEach(([name, over], i) => {
+    const sp = SPR[name];
+    const pal = Object.assign({}, sp.pal, over || {});
+    const [ox, oy] = POS[i % POS.length];
+    sp.rows.forEach((row, y) => {
+      for (let x = 0; x < row.length; x++) {
+        const ch = row[x];
+        if (ch !== "." && pal[ch]) rects += `<rect x="${ox + x * 4}" y="${oy + y * 4}" width="4.2" height="4.2" fill="${pal[ch]}"/>`;
+      }
+    });
+  });
+  const svgText = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" shape-rendering="crispEdges"><g opacity="${opacity}">${rects}</g></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svgText)}")`;
+}
+
+const THEMES = [
+  { id: "classique", name: "Classique", e: "🟩", group: "base", dark: null, sub: "Vert herbe, suit ton téléphone",
+    pv: { bg: "#E6E9DE", surface: "#F8F9F4", line: "#243326", grass: "#4E8A32", dirt: "#8B5E3C" } },
+  { id: "printemps", name: "Printemps", e: "🌸", group: "saisons", dark: false, sub: "Fleurs et nuages", op: 0.55,
+    v: { bg: "#EAF3E1", surface: "#FBFDF7", sunken: "#DDEBD0", ink: "#23331F", soft: "#56694F", line: "#2A3A26", grass: "#2F8040", hi: "#7CCB6B", dirt: "#E58FB0", dirtDk: "#C96F93", gold: "#F2B63D", red: "#C93A5A", sky: "#3AA6C9", err: "#C8352B" },
+    grad: "linear-gradient(180deg, rgba(120,200,255,.20), transparent 38%)",
+    wall: [["flower"], ["cloud"], ["flower", { p: "#FFFFFF" }], ["flower", { p: "#B79BE6" }], ["cloud"], ["flower"], ["flower", { p: "#FFFFFF" }], ["flower", { p: "#B79BE6" }], ["cloud"]] },
+  { id: "ete", name: "Été", e: "☀️", group: "saisons", dark: false, sub: "Soleil et vagues", op: 0.6,
+    v: { bg: "#FFF1CF", surface: "#FFFBEF", sunken: "#FBE5AE", ink: "#3A2A0B", soft: "#6F5A2B", line: "#4A3510", grass: "#0E7C8F", hi: "#4CC3D6", dirt: "#F0C35A", dirtDk: "#D9A53A", gold: "#F5B722", red: "#D9482B", sky: "#1E9AB0", err: "#C8352B" },
+    grad: "linear-gradient(180deg, rgba(80,190,230,.30), transparent 45%)",
+    wall: [["sun"], ["cloud"], ["wave"], ["wave"], ["sun", { y: "#FFD54F" }], ["cloud"], ["wave"], ["wave"], ["cloud"]] },
+  { id: "automne", name: "Automne", e: "🍂", group: "saisons", dark: false, sub: "Feuilles et citrouilles", op: 0.6,
+    v: { bg: "#F3E4CF", surface: "#FFF8EE", sunken: "#EAD2B2", ink: "#3A2312", soft: "#75522F", line: "#4A2E17", grass: "#B5541B", hi: "#E0873A", dirt: "#8B4E24", dirtDk: "#6B3A19", gold: "#E9A93B", red: "#A83228", sky: "#4B8F8C", err: "#B02A20" },
+    grad: "linear-gradient(180deg, rgba(220,140,60,.24), transparent 42%)",
+    wall: [["leaf"], ["leaf", { o: "#B8341E", v: "#8E2417" }], ["pumpkin"], ["leaf", { o: "#E3A62B", v: "#B8801A" }], ["leaf"], ["leaf", { o: "#B8341E", v: "#8E2417" }], ["pumpkin"], ["leaf", { o: "#E3A62B", v: "#B8801A" }], ["leaf"]] },
+  { id: "hiver", name: "Hiver", e: "❄️", group: "saisons", dark: false, sub: "Flocons et glace", op: 0.75,
+    v: { bg: "#E4EEF6", surface: "#F9FCFF", sunken: "#D2E2EF", ink: "#16283A", soft: "#4C657C", line: "#1F3248", grass: "#2F6EA3", hi: "#8CC4EC", dirt: "#BFD9EE", dirtDk: "#9BBFDC", gold: "#E8B84A", red: "#C44A4A", sky: "#2F9CAB", err: "#C03A3A" },
+    grad: "linear-gradient(180deg, rgba(150,200,240,.32), transparent 45%)",
+    wall: [["snow", { w: "#A9CBEA" }], ["snow", { w: "#FFFFFF" }], ["snow", { w: "#A9CBEA" }], ["snow", { w: "#FFFFFF" }], ["snow", { w: "#A9CBEA" }], ["snow", { w: "#FFFFFF" }], ["snow", { w: "#A9CBEA" }], ["snow", { w: "#FFFFFF" }], ["snow", { w: "#A9CBEA" }]] },
+  { id: "halloween", name: "Halloween", e: "🎃", group: "fetes", dark: true, sub: "Citrouilles, fantômes, chauves-souris", op: 0.5,
+    v: { bg: "#1B1326", surface: "#2A1E38", sunken: "#231A2F", ink: "#F4ECFA", soft: "#B7A6C9", line: "#0D0814", grass: "#C2500E", hi: "#FF9A3C", dirt: "#6B2FA0", dirtDk: "#4E2278", gold: "#FFB52E", red: "#E0473E", sky: "#55C2C9", err: "#FF8A80" },
+    grad: "linear-gradient(180deg, rgba(130,60,190,.45), transparent 45%)",
+    wall: [["pumpkin"], ["bat", { K: "#7A58AA" }], ["ghost", { W: "#CFC4E6", K: "#2A1A3A" }], ["bat", { K: "#7A58AA" }], ["pumpkin"], ["ghost", { W: "#CFC4E6", K: "#2A1A3A" }], ["bat", { K: "#7A58AA" }], ["pumpkin"], ["ghost", { W: "#CFC4E6", K: "#2A1A3A" }]] },
+  { id: "noel", name: "Noël", e: "🎄", group: "fetes", dark: false, sub: "Sapins, cadeaux, flocons", op: 0.7,
+    v: { bg: "#EFE8DF", surface: "#FFFDF9", sunken: "#E3D8CB", ink: "#2A1A18", soft: "#6A514C", line: "#32201D", grass: "#B3262B", hi: "#E4575B", dirt: "#1F6B3A", dirtDk: "#17522D", gold: "#E8B83A", red: "#B3262B", sky: "#1F6B3A", err: "#B3262B" },
+    grad: "linear-gradient(180deg, rgba(179,38,43,.12), transparent 40%)",
+    wall: [["tree"], ["snow", { w: "#BBD0E0" }], ["gift"], ["snow", { w: "#BBD0E0" }], ["tree"], ["gift"], ["snow", { w: "#BBD0E0" }], ["tree"], ["gift"]] },
+  { id: "valentin", name: "Saint-Valentin", e: "💘", group: "fetes", dark: false, sub: "Cœurs et étoiles", op: 0.6,
+    v: { bg: "#FBE9EE", surface: "#FFF9FB", sunken: "#F4D3DD", ink: "#3B1521", soft: "#7F4556", line: "#4A1D2B", grass: "#C2185B", hi: "#F06292", dirt: "#F48FB1", dirtDk: "#E1678F", gold: "#F7B733", red: "#C2185B", sky: "#7B3FA0", err: "#B3123F" },
+    grad: "linear-gradient(180deg, rgba(240,98,146,.18), transparent 40%)",
+    wall: [["heart"], ["heart", { r: "#F48FB1" }], ["star", { y: "#F5A3BF" }], ["heart", { r: "#C2185B" }], ["heart"], ["star", { y: "#F5A3BF" }], ["heart", { r: "#F48FB1" }], ["heart"], ["star", { y: "#F5A3BF" }]] },
+  { id: "paques", name: "Pâques", e: "🐣", group: "fetes", dark: false, sub: "Œufs et fleurs pastel", op: 0.7,
+    v: { bg: "#F1F4DC", surface: "#FFFFF8", sunken: "#E4EAC4", ink: "#2B3320", soft: "#5F6948", line: "#35402A", grass: "#7B52B8", hi: "#B79BE6", dirt: "#F2B8D4", dirtDk: "#DE95BB", gold: "#F5C84C", red: "#D9546E", sky: "#4FB3BF", err: "#C23B55" },
+    grad: "linear-gradient(180deg, rgba(183,155,230,.20), transparent 40%)",
+    wall: [["egg"], ["flower"], ["egg", { p: "#B79BE6" }], ["flower", { p: "#FFFFFF" }], ["egg", { p: "#7FD1C8" }], ["flower"], ["egg"], ["flower", { p: "#FFFFFF" }], ["egg", { p: "#F5C84C" }]] },
+  { id: "nouvelan", name: "Nouvel An", e: "🎆", group: "fetes", dark: true, sub: "Feux d'artifice et étoiles", op: 0.5,
+    v: { bg: "#0F1830", surface: "#1B2748", sunken: "#15203D", ink: "#F6F1DC", soft: "#A9B4D6", line: "#060B18", grass: "#3A52C9", hi: "#7F94FF", dirt: "#E6B83C", dirtDk: "#BF9626", gold: "#F5C84C", red: "#E5566B", sky: "#55C2E8", err: "#FF8A92" },
+    grad: "linear-gradient(180deg, rgba(90,110,230,.35), transparent 45%)",
+    wall: [["star"], ["firework"], ["star", { y: "#FF6F91" }], ["firework", { y: "#7F94FF", o: "#F5C84C" }], ["star"], ["firework"], ["star", { y: "#7F94FF" }], ["firework", { y: "#FF6F91", o: "#F5C84C" }], ["star"]] },
+];
+const THEME_BY_ID = Object.fromEntries(THEMES.map((t) => [t.id, t]));
+const VAR_MAP = { bg: "--bg", surface: "--surface", sunken: "--sunken", ink: "--ink", soft: "--soft", line: "--line", grass: "--grass", hi: "--grass-hi", dirt: "--dirt", dirtDk: "--dirt-dk", gold: "--gold", red: "--red", sky: "--sky", err: "--err" };
+
+function easterDate(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(y, mo - 1, da);
+}
+function themeForDate(dt) {
+  const md = (dt.getMonth() + 1) * 100 + dt.getDate();
+  const day = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  const easter = easterDate(dt.getFullYear());
+  const diff = Math.round((day - easter) / 86400000);
+  if (md >= 1015 && md <= 1101) return "halloween";
+  if (md >= 1201 && md <= 1226) return "noel";
+  if (md >= 1227 || md <= 103) return "nouvelan";
+  if (md >= 207 && md <= 214) return "valentin";
+  if (diff >= -10 && diff <= 1) return "paques";
+  if (md >= 320 && md <= 620) return "printemps";
+  if (md >= 621 && md <= 922) return "ete";
+  if (md >= 923 && md <= 1130) return "automne";
+  return "hiver";
+}
+
+const wallCache = {};
+function wallOf(t) {
+  if (!t.wall) return null;
+  if (!wallCache[t.id]) wallCache[t.id] = { image: `${wallTile(t.wall, t.op)}, ${t.grad}`, size: "240px 240px, 100% 100%" };
+  return wallCache[t.id];
+}
+let themeOverride = null;
+const getThemeChoice = () => {
+  if (themeOverride) return themeOverride;
+  try { const v = localStorage.getItem(THEME_KEY); return v === "auto" || THEME_BY_ID[v] ? v : "classique"; } catch (e) { return "classique"; }
+};
+const resolveTheme = (choice) => THEME_BY_ID[choice === "auto" ? themeForDate(new Date()) : choice];
+
+function applyTheme() {
+  const root = document.documentElement;
+  const t = resolveTheme(getThemeChoice());
+  Object.values(VAR_MAP).forEach((k) => root.style.removeProperty(k));
+  root.style.removeProperty("--wallpaper");
+  root.style.removeProperty("--wallsize");
+  root.dataset.theme = t.id;
+  let primary = "#4E8A32";
+  if (t.v) {
+    Object.entries(VAR_MAP).forEach(([k, cssVar]) => root.style.setProperty(cssVar, t.v[k]));
+    const w = wallOf(t);
+    root.style.setProperty("--wallpaper", w.image);
+    root.style.setProperty("--wallsize", w.size);
+    root.style.colorScheme = t.dark ? "dark" : "light";
+    primary = t.v.grass;
+  } else {
+    root.style.colorScheme = "light dark";
+  }
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", primary);
+}
+
+function themeCardHTML(t, choice, label) {
+  const pv = t.v || t.pv;
+  const w = wallOf(t);
+  const picked = choice === t.id;
+  return `<button type="button" class="theme" data-act="set-theme" data-t="${t.id}" aria-pressed="${picked}">
+    <div class="tp" style="background-color:${pv.bg};${w ? `background-image:${w.image};background-size:${w.size};` : ""}">
+      <div class="tpbar" style="background:${pv.grass};border-bottom:5px solid ${pv.dirt}"></div>
+      <div class="tpcard" style="background:${pv.surface};border-color:${pv.line}"></div>
+      ${picked ? `<span class="chk">${I.check}</span>` : ""}
+    </div>
+    <div class="tn">${t.e} ${esc(label || t.name)}<small>${esc(t.sub)}</small></div>
+  </button>`;
+}
+function themesInner() {
+  const choice = getThemeChoice();
+  const auto = THEME_BY_ID[themeForDate(new Date())];
+  const autoCard = `<button type="button" class="theme" data-act="set-theme" data-t="auto" aria-pressed="${choice === "auto"}">
+    <div class="tp" style="background-color:${auto.v ? auto.v.bg : "#E6E9DE"};${wallOf(auto) ? `background-image:${wallOf(auto).image};background-size:${wallOf(auto).size};` : ""}">
+      <div class="tpbar" style="background:${(auto.v || auto.pv).grass};border-bottom:5px solid ${(auto.v || auto.pv).dirt}"></div>
+      <div class="tpcard" style="background:${(auto.v || auto.pv).surface};border-color:${(auto.v || auto.pv).line}"></div>
+      ${choice === "auto" ? `<span class="chk">${I.check}</span>` : ""}
+    </div>
+    <div class="tn">✨ Automatique<small>Aujourd'hui : ${auto.e} ${esc(auto.name)}</small></div>
+  </button>`;
+  const grp = (g) => THEMES.filter((t) => t.group === g).map((t) => themeCardHTML(t, choice)).join("");
+  return `<h2>Choisis ton thème</h2>
+    <div class="themes">
+      ${autoCard}
+      ${grp("base")}
+      <div class="sectitle">Saisons</div>
+      ${grp("saisons")}
+      <div class="sectitle">Fêtes</div>
+      ${grp("fetes")}
+    </div>
+    <div class="foot"><button type="button" class="blk" data-act="close-sheet">Terminé</button></div>`;
+}
+function showInSheet(inner) { if (sheetOpen) $("#sheetInner").innerHTML = inner; else openSheet(inner); }
+function openThemes() { showInSheet(themesInner()); }
+function setTheme(id) {
+  try { localStorage.setItem(THEME_KEY, id); } catch (e) { /* aperçu sans stockage */ }
+  themeOverride = id;
+  applyTheme();
+  const inner = $("#sheetInner");
+  if (inner) { const sc = $(".panel", sheetEl).scrollTop; inner.innerHTML = themesInner(); $(".panel", sheetEl).scrollTop = sc; }
+}
+
+/* ===================== Formulaire ===================== */
+const chip = (g, v, sel, extra = "", style = "") =>
+  `<button type="button" class="chip" ${style ? `style="${style}"` : ""} data-act="pick" data-g="${g}" data-v="${esc(v)}" aria-pressed="${sel === v}">${extra}${esc(v)}</button>`;
+
+function showForm(id) {
+  const b = id ? getBuild(id) : null;
+  currentId = id || null;
+  draft = {
+    season: b ? b.season : ALL_YEAR,
+    difficulty: b ? b.difficulty : "Facile",
+    edition: b ? b.edition : "Bedrock",
+    status: b ? b.status : "À faire",
+  };
+  const themes = Array.from(new Set([...knownThemes(), ...QUICK_CATEGORIES])).slice(0, 12);
+  const catChip = (t) => `<button type="button" class="chip catchip" data-act="theme" data-v="${esc(t)}" aria-pressed="${!!b && b.theme === t}">${themeEmoji(t)} ${esc(t)}</button>`;
+  pageEl.innerHTML = `
+    <div class="pagebar">
+      <button type="button" class="iconbtn" data-act="cancel-form" aria-label="Fermer">${I.x}</button>
+      <div class="pagetitle">${b ? "Modifier le build" : "Nouveau build"}</div>
+    </div>
+    <div class="pagescroll"><div class="pagebody withbar">
+      <div class="field">
+        <label for="f-url">Lien de la vidéo</label>
+        <input class="input" id="f-url" type="url" inputmode="url" autocomplete="off" placeholder="Colle ici le lien YouTube, TikTok…" value="${esc(b ? b.url : "")}">
+        <p class="help" id="f-hint">Le titre se remplit tout seul quand c'est possible.</p>
+      </div>
+      <div class="field">
+        <label for="f-title">Nom du build</label>
+        <input class="input" id="f-title" type="text" autocomplete="off" placeholder="Maison de hobbit dans la colline" value="${esc(b ? b.title : "")}">
+        <p class="err" id="e-title" hidden></p>
+      </div>
+      <div class="field">
+        <label for="f-author">Créateur <span style="font-weight:600;color:var(--soft)">(facultatif)</span></label>
+        <input class="input" id="f-author" type="text" autocomplete="off" placeholder="Nom de la chaîne" value="${esc(b ? b.author : "")}">
+      </div>
+      <div class="field">
+        <label for="f-theme">Catégorie</label>
+        <input class="input" id="f-theme" type="text" autocomplete="off" placeholder="Choisis ou écris la tienne" value="${esc(b ? b.theme : "")}">
+        <div class="chips" id="themeChips" style="margin-top:10px">${themes.map(catChip).join("")}</div>
+        <button type="button" class="morebtn" data-act="all-cats" aria-expanded="false">Voir toutes les catégories</button>
+        <div id="allCats" hidden>${CATEGORIES.map((g) => `<div class="cathead">${esc(g.g)}</div><div class="chips">${g.items.map(([n]) => catChip(n)).join("")}</div>`).join("")}</div>
+      </div>
+      <div class="field">
+        <div class="lbl">Saison</div>
+        <div class="chips">${SEASONS.map((s) => chip("season", s.n, draft.season, `<span aria-hidden="true">${s.e}</span>`, `--c:${s.c}`)).join("")}</div>
+      </div>
+      <div class="field">
+        <div class="lbl">Difficulté</div>
+        <div class="seg2" style="margin-top:0">${DIFFS.map((d) => `<button type="button" data-act="pick" data-g="difficulty" data-v="${d}" aria-pressed="${draft.difficulty === d}">${d}</button>`).join("")}</div>
+      </div>
+      <div class="field">
+        <div class="lbl">Édition de Minecraft</div>
+        <div class="seg2" style="margin-top:0">${EDITIONS.map((d) => `<button type="button" data-act="pick" data-g="edition" data-v="${d}" aria-pressed="${draft.edition === d}">${d}</button>`).join("")}</div>
+      </div>
+      <div class="field">
+        <label for="f-mat">Matériaux</label>
+        <textarea class="input" id="f-mat" placeholder="128 Pierre lisse&#10;64 Planches de chêne&#10;16 Vitres">${esc(b ? b.materials.map((m) => m.text).join("\n") : "")}</textarea>
+        <p class="help">Un matériau par ligne, la quantité en premier. <span id="f-matcount"></span></p>
+      </div>
+      <div class="field">
+        <label for="f-notes">Notes <span style="font-weight:600;color:var(--soft)">(facultatif)</span></label>
+        <textarea class="input" id="f-notes" style="min-height:90px" placeholder="Un passage de la vidéo, une astuce, une variante">${esc(b ? b.notes : "")}</textarea>
+      </div>
+      ${b ? `<button type="button" class="danger" data-act="delete">Supprimer ce build</button>` : ""}
+    </div></div>
+    <div class="savebar">
+      <button type="button" class="blk ghost" data-act="cancel-form">Annuler</button>
+      <button type="button" class="blk" data-act="save">Enregistrer</button>
+    </div>`;
+  openPage();
+  syncThemeChips();
+  countMaterials();
+  if (!b) setTimeout(() => $("#f-url") && $("#f-url").focus(), 250);
+}
+
+function syncThemeChips() {
+  const v = ($("#f-theme") || {}).value?.trim().toLowerCase();
+  document.querySelectorAll(".catchip").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.v.toLowerCase() === v)));
+}
+function countMaterials() {
+  const ta = $("#f-mat");
+  if (!ta) return;
+  const n = ta.value.split("\n").filter((l) => l.trim()).length;
+  const el = $("#f-matcount");
+  if (el) el.textContent = n ? `${n} matériau${n > 1 ? "x" : ""}.` : "";
+}
+
+let fetchTimer = null;
+let fetchCtl = null;
+function onUrlInput() {
+  const url = $("#f-url").value.trim();
+  const hint = $("#f-hint");
+  clearTimeout(fetchTimer);
+  if (!url) { hint.textContent = "Le titre se remplit tout seul quand c'est possible."; hint.className = "help"; return; }
+  if (!isUrl(url)) { hint.textContent = "Ce lien semble incomplet."; hint.className = "help"; return; }
+  const v = parseVideo(url);
+  hint.textContent = `Lien ${PLATFORM[v.kind] ? "détecté : " + PLATFORM[v.kind] : "ajouté"}.`;
+  hint.className = "help";
+  fetchTimer = setTimeout(async () => {
+    const t = $("#f-title");
+    const a = $("#f-author");
+    if (!t || t.value.trim() && t.dataset.auto !== "1") return;
+    try {
+      if (fetchCtl) fetchCtl.abort();
+      fetchCtl = new AbortController();
+      const timeout = setTimeout(() => fetchCtl.abort(), 5000);
+      const r = await fetch("https://noembed.com/embed?url=" + encodeURIComponent(url), { signal: fetchCtl.signal });
+      clearTimeout(timeout);
+      const d = await r.json();
+      if (!$("#f-title")) return;
+      if (d && d.title && (!t.value.trim() || t.dataset.auto === "1")) {
+        t.value = d.title;
+        t.dataset.auto = "1";
+        if (a && !a.value.trim() && d.author_name) a.value = d.author_name;
+        hint.innerHTML = `<span class="ok">Titre récupéré automatiquement.</span>`;
+      }
+    } catch (e) { /* hors ligne ou site non pris en charge : on laisse l'utilisateur saisir */ }
+  }, 500);
+}
+
+function saveForm() {
+  const title = $("#f-title").value.trim();
+  const url = $("#f-url").value.trim();
+  const err = $("#e-title");
+  if (!url || !isUrl(url)) {
+    $("#f-hint").innerHTML = `<span class="err">Colle un lien complet qui commence par https://</span>`;
+    $("#f-url").focus();
+    return;
+  }
+  if (!title) {
+    err.textContent = "Donne un nom à ce build.";
+    err.hidden = false;
+    $("#f-title").focus();
+    return;
+  }
+  const prev = currentId ? getBuild(currentId) : null;
+  const doneByText = new Map((prev ? prev.materials : []).map((m) => [m.text.toLowerCase(), m.done]));
+  const materials = $("#f-mat").value.split("\n").map((l) => l.trim()).filter(Boolean)
+    .map((t) => ({ id: uid(), text: t, done: doneByText.get(t.toLowerCase()) || false }));
+  const b = {
+    id: prev ? prev.id : uid(),
+    createdAt: prev ? prev.createdAt : Date.now(),
+    status: draft.status,
+    title, url,
+    author: $("#f-author").value.trim(),
+    theme: $("#f-theme").value.trim(),
+    season: draft.season,
+    difficulty: draft.difficulty,
+    edition: draft.edition,
+    notes: $("#f-notes").value.trim(),
+    materials,
+  };
+  upsert(b);
+  toast(prev ? "Modifications enregistrées" : "Build ajouté au carnet");
+  showDetail(b.id);
+}
+
+function deleteCurrent() {
+  const b = getBuild(currentId);
+  if (!b) return;
+  const idx = builds.findIndex((x) => x.id === b.id);
+  builds.splice(idx, 1);
+  persist();
+  goBack();
+  toast("Build supprimé", "Annuler", () => {
+    builds.splice(Math.min(idx, builds.length), 0, b);
+    persist();
+    renderList();
+  });
+}
+
+/* ===================== Feuilles : filtres, menu, installation ===================== */
+function filterSheetInner() {
+  const themes = knownThemes();
+  const group = (key, title, options, color, icon) => `
+    <div class="fgroup"><h3>${title}</h3><div class="chips">
+      ${options.map((o) => `<button type="button" class="chip" ${color ? `style="--c:${color(o)}"` : ""} data-act="filter" data-k="${key}" data-v="${esc(o)}" aria-pressed="${st.f[key] === o}">${icon ? icon(o) + " " : ""}${esc(o)}</button>`).join("")}
+    </div></div>`;
+  return `<h2>Filtrer les builds</h2>
+    ${themes.length ? group("theme", "Catégorie", themes, null, themeEmoji) : ""}
+    ${group("season", "Saison", SEASONS.map((s) => s.n), seasonColor, seasonEmoji)}
+    ${group("difficulty", "Difficulté", DIFFS)}
+    ${group("edition", "Édition", EDITIONS.slice(0, 2))}
+    <div class="foot">
+      <button type="button" class="blk ghost" data-act="clear-filters">Effacer</button>
+      <button type="button" class="blk" data-act="close-sheet">Voir ${filtered().length} build${filtered().length > 1 ? "s" : ""}</button>
+    </div>`;
+}
+function openFilters() { openSheet(filterSheetInner()); }
+function refreshFilterSheet() {
+  const inner = $("#sheetInner");
+  if (inner) inner.innerHTML = filterSheetInner();
+  renderList();
+}
+
+function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); }
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredPrompt = e; renderBanner(); });
+window.addEventListener("appinstalled", () => { deferredPrompt = null; renderBanner(); toast("Application installée"); });
+
+function installFlow() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.finally(() => { deferredPrompt = null; renderBanner(); });
+    return;
+  }
+  const steps = isIOS()
+    ? `<li>Ouvre cette page dans <b>Safari</b>.</li><li>Touche le bouton <b>Partager</b> (le carré avec une flèche).</li><li>Choisis <b>Sur l'écran d'accueil</b>, puis <b>Ajouter</b>.</li>`
+    : `<li>Ouvre le menu de ton navigateur (les trois points).</li><li>Choisis <b>Installer l'application</b> ou <b>Ajouter à l'écran d'accueil</b>.</li>`;
+  const inner = `<h2>Installer sur ton téléphone</h2><ol class="howto">${steps}</ol>
+    <p class="help">L'application s'ouvrira alors en plein écran, comme les autres, et marchera aussi sans connexion.</p>
+    <div class="foot"><button type="button" class="blk" data-act="close-sheet">Compris</button></div>`;
+  if (sheetOpen) $("#sheetInner").innerHTML = inner; else openSheet(inner);
+}
+
+function openMenu() {
+  const t = resolveTheme(getThemeChoice());
+  showInSheet(`<h2>Menu</h2>
+    <button type="button" class="menurow" data-act="themes"><span style="font-size:24px;width:24px;text-align:center">${t.e}</span><span><b>Thèmes et fonds d'écran</b><small>${getThemeChoice() === "auto" ? "Automatique : " : ""}${esc(t.name)}</small></span></button>
+    <button type="button" class="menurow" data-act="install">${I.phone}<span><b>Installer l'application</b><small>L'ajouter à l'écran d'accueil</small></span></button>
+    <button type="button" class="menurow" data-act="transfer">${I.down}<span><b>Sauvegarde et transfert</b><small>Garder ou déplacer tes builds</small></span></button>
+    ${builds.some((b) => b.sample)
+      ? `<button type="button" class="menurow" data-act="remove-samples">${I.x}<span><b>Retirer les exemples</b><small>Garde uniquement tes propres builds</small></span></button>`
+      : `<button type="button" class="menurow" data-act="add-samples">${I.plus}<span><b>Ajouter les exemples</b><small>Builds d'automne et d'Halloween</small></span></button>`}`);
+}
+
+function backupJSON() {
+  return JSON.stringify({ app: "carnet-builds", version: 2, exportedAt: new Date().toISOString(), builds }, null, 2);
+}
+function openTransfer() {
+  showInSheet(`<h2>Sauvegarde et transfert</h2>
+    <p class="warn">Pour passer d'une ancienne version à une nouvelle, fais d'abord une sauvegarde dans l'<b>ancienne</b>, puis restaure-la ici. Les builds comptent : <b>${builds.length}</b> sur cet appareil.</p>
+    <button type="button" class="menurow" data-act="export">${I.down}<span><b>Télécharger un fichier de sauvegarde</b><small>Un fichier .json à garder</small></span></button>
+    <button type="button" class="menurow" data-act="copy-backup">${I.down}<span><b>Copier la sauvegarde</b><small>Du texte à coller dans une autre version</small></span></button>
+    <button type="button" class="menurow" data-act="import">${I.up}<span><b>Restaurer depuis un fichier</b><small>Ajoute les builds d'un fichier .json</small></span></button>
+    <details class="ctx" id="pasteBox"><summary>Restaurer depuis du texte copié</summary>
+      <textarea class="input mono" id="restoreText" placeholder="Colle ici la sauvegarde copiée" style="margin-top:8px"></textarea>
+      <div class="foot" style="margin-top:10px"><button type="button" class="blk" data-act="restore-text">Restaurer</button></div>
+    </details>
+    <p class="help" style="margin-top:12px">Une restauration ajoute tes builds sans effacer les autres, et tu peux l'annuler juste après.</p>`);
+}
+
+function exportData() {
+  const blob = new Blob([backupJSON()], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `carnet-builds-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  toast("Sauvegarde téléchargée");
+}
+async function copyBackup() {
+  const text = backupJSON();
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("Sauvegarde copiée. Colle-la dans l'autre version.");
+  } catch (e) {
+    const box = $("#pasteBox"); if (box) box.open = true;
+    const ta = $("#restoreText");
+    if (ta) { ta.value = text; ta.focus(); ta.select(); }
+    toast("Copie manuelle : sélectionne le texte et copie-le.");
+  }
+}
+function importPayload(text) {
+  let d;
+  try { d = JSON.parse(text); } catch (e) { toast("Ce texte n'est pas une sauvegarde valide."); return; }
+  const arr = Array.isArray(d) ? d : d && d.builds;
+  if (!Array.isArray(arr) || !arr.length) { toast("Aucun build trouvé dans cette sauvegarde."); return; }
+  const before = builds.map((b) => JSON.parse(JSON.stringify(b)));
+  let added = 0, updated = 0;
+  arr.map(normalize).forEach((b) => {
+    const i = builds.findIndex((x) => x.id === b.id);
+    if (i >= 0) { builds[i] = b; updated++; } else { builds.push(b); added++; }
+  });
+  persist();
+  if (sheetOpen) goBack();
+  renderList();
+  toast(`${added} ajouté${added > 1 ? "s" : ""}, ${updated} mis à jour`, "Annuler", () => { builds = before; persist(); renderList(); toast("Restauration annulée"); });
+}
+$("#importFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  try { importPayload(await file.text()); } catch (err) { toast("Impossible de lire ce fichier."); }
+});
+
+/* ===================== Evenements ===================== */
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const open = t.closest("[data-open]");
+  if (open) { showDetail(open.dataset.open); return; }
+  const tab = t.closest("[data-tab]");
+  if (tab) { st.tab = tab.dataset.tab; renderList(); return; }
+  const clr = t.closest("[data-clear]");
+  if (clr) { st.f[clr.dataset.clear] = ""; renderList(); return; }
+
+  const el = t.closest("[data-act]");
+  if (!el) return;
+  const act = el.dataset.act;
+  switch (act) {
+    case "new": showForm(null); break;
+    case "back": goBack(); break;
+    case "edit": showForm(currentId); break;
+    case "cancel-form": if (currentId && getBuild(currentId)) showDetail(currentId); else goBack(); break;
+    case "save": saveForm(); break;
+    case "delete": deleteCurrent(); break;
+    case "status": {
+      const b = getBuild(currentId); if (!b) break;
+      b.status = el.dataset.s; persist();
+      el.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === el)));
+      break;
+    }
+    case "check": {
+      const b = getBuild(currentId); if (!b) break;
+      const m = b.materials.find((x) => x.id === el.dataset.mid); if (!m) break;
+      m.done = !m.done; persist(); refreshMaterials(b);
+      if (b.materials.length && b.materials.every((x) => x.done)) toast("Tout est réuni, à toi de jouer !");
+      break;
+    }
+    case "uncheck-all": {
+      const b = getBuild(currentId); if (!b) break;
+      b.materials.forEach((m) => (m.done = false)); persist(); refreshMaterials(b);
+      break;
+    }
+    case "pick": {
+      draft[el.dataset.g] = el.dataset.v;
+      el.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === el)));
+      break;
+    }
+    case "theme": {
+      const inp = $("#f-theme"); inp.value = el.dataset.v; syncThemeChips();
+      break;
+    }
+    case "filter": {
+      const k = el.dataset.k, v = el.dataset.v;
+      st.f[k] = st.f[k] === v ? "" : v;
+      refreshFilterSheet();
+      break;
+    }
+    case "clear-filters": st.f = { theme: "", season: "", difficulty: "", edition: "" }; refreshFilterSheet(); break;
+    case "reset-all": st.q = ""; $("#q").value = ""; st.tab = "Tous"; st.f = { theme: "", season: "", difficulty: "", edition: "" }; renderList(); break;
+    case "close-sheet": goBack(); break;
+    case "install": installFlow(); break;
+    case "dismiss-banner": try { localStorage.setItem(DISMISS_KEY, "1"); } catch (err) {} renderBanner(); break;
+    case "all-cats": {
+      const box = $("#allCats"); box.hidden = !box.hidden;
+      el.setAttribute("aria-expanded", String(!box.hidden));
+      el.textContent = box.hidden ? "Voir toutes les catégories" : "Masquer les catégories";
+      break;
+    }
+    case "remove-samples": builds = builds.filter((b) => !b.sample); persist(); goBack(); renderList(); toast("Exemples retirés"); break;
+    case "add-samples": builds = builds.concat(sampleBuilds().filter((s) => !builds.some((b) => b.id === s.id))); persist(); goBack(); renderList(); toast("Exemples ajoutés"); break;
+    case "themes": openThemes(); break;
+    case "set-theme": setTheme(el.dataset.t); break;
+    case "transfer": openTransfer(); break;
+    case "copy-backup": copyBackup(); break;
+    case "restore-text": importPayload(($("#restoreText") || {}).value || ""); break;
+    case "export": exportData(); break;
+    case "import": $("#importFile").click(); break;
+  }
+});
+
+document.addEventListener("input", (e) => {
+  const id = e.target.id;
+  if (id === "q") { st.q = e.target.value; renderList(); }
+  else if (id === "f-url") onUrlInput();
+  else if (id === "f-theme") syncThemeChips();
+  else if (id === "f-mat") countMaterials();
+  else if (id === "f-title") { e.target.dataset.auto = "0"; const er = $("#e-title"); if (er) er.hidden = true; }
+});
+
+$("#btnFilters").addEventListener("click", openFilters);
+$("#btnMenu").addEventListener("click", openMenu);
+$("#btnTheme").addEventListener("click", openThemes);
+$("#fab").addEventListener("click", () => showForm(null));
+
+/* ===================== Démarrage ===================== */
+$("#icSearch").innerHTML = I.search;
+$("#btnMenu").innerHTML = I.dots;
+$("#btnTheme").innerHTML = I.palette;
+applyTheme();
+try { localStorage.removeItem("carnet-ai-key"); } catch (e) { /* rien à nettoyer */ }
+$("#fab").innerHTML = I.plus + "Ajouter";
+load();
+renderList();
+
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+})();
+</script>
+</body>
+</html>
